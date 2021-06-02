@@ -19,7 +19,12 @@ app.get("/quotes", function (request, response) {
 // GET
 app.get("/quotes/:id", function (request, response) {
   let id = parseInt(request.params.id);
-  response.json(quotes.filter(item => item.id === id));
+  let index = quotes.findIndex(item => item.id === id);
+  if (index < 0) {
+    response.status(404).send('');
+  } else {
+    response.json(quotes.filter(item => item.id === id));
+  }
 });
 
 // POST
@@ -27,16 +32,20 @@ app.post("/quotes", (request, response) => {
   var quote = request.body;
   let nextId = Math.max(...quotes.map(item => item.id)) + 1;
   quotes.push({ ...quote, "id": nextId });
-  response.send(quotes);
+  response.send({ ...quote, "id": nextId });
 });
 
 // PUT
 app.put("/quotes/:id", (request, response) => {
   let id = parseInt(request.params.id);
   let index = quotes.findIndex(item => item.id === id);
-  var quote = request.body;
-  quotes.splice(index, 1, { ...quote, id });
-  response.send(quotes);
+  if (index < 0) {
+    response.status(404).send('');
+  } else {
+    const quote = request.body;
+    quotes.splice(index, 1, { ...quote, id });
+    response.send(quotes);
+  }
 });
 
 
@@ -44,7 +53,7 @@ app.put("/quotes/:id", (request, response) => {
 app.delete("/quotes/:id", (request, response) => {
   let id = parseInt(request.params.id);
   let index = quotes.findIndex(item => item.id === id);
-  quotes.splice(index, 1);
+  quotes.splice(index, 1, undefined);
   response.send(quotes);
 });
 
